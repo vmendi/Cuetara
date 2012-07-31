@@ -1,0 +1,138 @@
+<XmlParams>
+	<Param>
+		<Name>ObstaclesTiming</Name>
+		<Description>Cada cuanto tiempo sale un nuevo obstáculo</Description>
+		<Type>utils.Curve</Type>
+		<Value>
+			<KeyFrame Time="0"   Value="3" />
+			<KeyFrame Time="120" Value="1.5" />
+			<KeyFrame Time="240" Value="0.500" />
+		</Value>
+	</Param>
+	
+	<Param>
+		<Name>ObstaclesTimingVariability</Name>
+		<Type>utils.Curve</Type>
+		<Value>
+			<KeyFrame Time="0"   Value="0.4" />
+			<KeyFrame Time="120" Value="0.2" />
+			<KeyFrame Time="240" Value="0.1" />
+		</Value>
+	</Param>
+	
+	<Param>
+		<Name>ObstacleSpeed</Name>
+		<Description>Velocidad horizontal del obstáculo</Description>
+		<Type>Number</Type>
+		<Value>100</Value>
+	</Param>
+	<Param>
+		<Name>ObstacleSpeedVariability</Name>
+		<Type>Number</Type>
+		<Value>40</Value>
+	</Param>
+	
+	<Param>
+		<Name>ObstacleY</Name>
+		<Description>Posición vertical normalizada del obstáculo</Description>
+		<Type>Number</Type>
+		<Value>0.4</Value>
+	</Param>
+	<Param>
+		<Name>ObstacleYVariability</Name>
+		<Type>Number</Type>
+		<Value>0.3</Value>
+	</Param>
+	
+	<Param>
+		<Name>ObstacleReboundY</Name>
+		<Description>Velocidad vertical de rebote (pixels/sec, Y positiva hacia abajo)</Description>
+		<Type>Number</Type>
+		<Value>-250</Value>
+	</Param>
+	<Param>
+		<Name>ObstacleReboundYVariability</Name>
+		<Type>Number</Type>
+		<Value>100</Value>
+	</Param>
+	
+	<Param>
+		<Name>ObstacleReboundX</Name>
+		<Description>Diferencia (se suma) en la velocidad horizontal de rebote (pixels/sec)</Description>
+		<Type>Number</Type>
+		<Value>-50</Value>
+	</Param>
+	<Param>
+		<Name>ObstacleReboundXVariability</Name>
+		<Type>Number</Type>
+		<Value>350</Value>
+	</Param>
+	
+	<Param>
+		<Name>PointsPerRebound</Name>
+		<Description>Puntos por rebote en la cama</Description>
+		<Type>Number</Type>
+		<Value>10</Value>
+	</Param>
+	<Param>
+		<Name>PointsPerObstacleKill</Name>
+		<Description>Puntos por clickar sobre obstáculo</Description>
+		<Type>Number</Type>
+		<Value>20</Value>
+	</Param>
+	
+	<Param>
+		<Name>BedMaxLenght</Name>
+		<Description>Máxima longitud de la cama en pixeles</Description>
+		<Type>Number</Type>
+		<Value>100</Value>
+	</Param>
+	<Param>
+		<Name>BedVibratingTime</Name>
+		<Description>Tiempo en segundos que vibra la cama</Description>
+		<Type>Number</Type>
+		<Value>0.5</Value>
+	</Param>
+	
+	<Param>
+		<Name>ReboundExitVel</Name>
+		<Description>Módulo de la velocidad de salida después del rebote en la cama. Pixeles/s</Description>
+		<Type>Number</Type>
+		<Value>600</Value>
+	</Param>
+	<Param>
+		<Name>ReboundHorizontalFactor</Name>
+		<Description>Factor por el que se multiplica la componente horizontal de la velocidad de salida.</Description>
+		<Type>Number</Type>
+		<Value>1.0</Value>
+	</Param>
+	
+	<Param>
+		<Name>ScreenGravity</Name>
+		<Description>Gravedad en espacio de pantalla. Pixeles/s^2</Description>
+		<Type>Number</Type>
+		<Value>600</Value>
+	</Param>
+	
+	
+	<Param>
+		<Name>LavaHeight</Name>
+		<Description>Altura de la lava</Description>
+		<Type>Number</Type>
+		<Value>30</Value>
+	</Param>
+	<Param>
+		<Name>LavaSpeed</Name>
+		<Description>Velocidad horizontal</Description>
+		<Type>Number</Type>
+		<Value>20</Value>
+	</Param>
+	
+	<Param>
+		<Name>MaxLifes</Name>
+		<Description>Vidas con las que comienzas. Tiene que haber labels desde MaxLifes-1.</Description>
+		<Type>Number</Type>
+		<Value>3</Value>
+	</Param>
+	
+</XmlParams>

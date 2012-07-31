@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
+	creationComplete="OnCreationComplete();" width="700" height="400" frameRate="30" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.XmlParams;
+			import flash.utils.getTimer;
+		
+			import mx.controls.Alert;
+			import mx.controls.SWFLoader;			
+			import mx.core.UIComponent;
+			
+			protected function OnCreationComplete():void
+			{
+				mGameContainer = new UIComponent();
+				
+				addChild(mGameContainer);
+				
+				// El GameContainer marca necesariamente el área de juego. Actua de "Stage" virtual.
+				mGameContainer.width = this.width;
+				mGameContainer.height = this.height;
+				
+				// Mandamos a cargar nuestros assets
+				mSWFLoader = new SWFLoader();
+				mSWFLoader.loaderContext = new LoaderContext(false, ApplicationDomain.currentDomain);
+				mSWFLoader.scaleContent = false;
+				mSWFLoader.addEventListener("complete", swfLoaded);
+				mSWFLoader.addEventListener("ioError", swfLoadError);
+				mSWFLoader.addEventListener("securityError", swfLoadError);
+				mSWFLoader.load("Assets/Assets.swf");	
+			
+				function swfLoaded(event:Event):void
+				{
+					StartGameIfReady();					
+				}
+				
+				function swfLoadError(event:Event) : void
+				{
+					Alert.show("Error de carga", "Error", Alert.OK);
+				}
+				
+				// Cargamos el XML de configuración
+				var myXMLURL:URLRequest = new URLRequest("Assets/GameParams.xml");
+				mXMLLoader = new URLLoader();
+				mXMLLoader.addEventListener("complete", xmlLoaded);
+				mXMLLoader.addEventListener("ioError", xmlLoadError);
+				mXMLLoader.addEventListener("securityError", xmlLoadError);
+				mXMLLoader.load(myXMLURL);
+			
+				function xmlLoaded(event:Event):void
+				{
+					var myXML:XML = XML(mXMLLoader.data);
+					
+					var xmlParams : XmlParams = new XmlParams();
+					xmlParams.LoadFromXML(myXML);
+					
+					mGameParams = new GameParams(xmlParams);
+					
+					StartGameIfReady();
+				}
+				
+				function xmlLoadError(event:IOErrorEvent):void
+				{
+					Alert.show("Error de carga", "Error", Alert.OK);
+				}
+			}
+			
+			private function StartGameIfReady() : void
+			{
+				mNumLoaded++;
+				
+				// Tenemos que esperar a que todos los ficheros de recursos estén cargados. TODO: Generalización.
+				if (mNumLoaded != 2)
+					return;
+				
+				mLifeScore = new LifeScore(mGameParams);
+				mFisixBed = new FisixBed(mGameParams);
+				mMainCharacter = new Character(mLifeScore, mGameParams);								
+				mLevel = new HorizontalLevel(mMainCharacter, mLifeScore, mGameParams);
+
+				mGameContainer.addChild(mLevel);
+				mGameContainer.addChild(mFisixBed);
+				mGameContainer.addChild(mMainCharacter);
+				mGameContainer.addChild(mLifeScore);
+				
+				addEventListener(Event.ENTER_FRAME, OnEnterFrame, false, 0, true);
+			}
+			
+			protected function OnEnterFrame(event:Event):void
+			{
+				//var currentTime : int = getTimer();
+				//var elapsedTime : Number = (currentTime - lastTime) / 1000.0;
+				var elapsedTime : Number = 1.0 / 30.0;
+				
+				// Lo primero, los parametros globales de juego animados en función del tiempo
+				mGameParams.Update(elapsedTime);
+				
+				// Colisión cama-personaje
+				var nextCharPos : Point = mMainCharacter.GetNextPos(elapsedTime);
+				
+				if (mFisixBed.IsCollision(nextCharPos, mMainCharacter.Radius))
+				{
+					mMainCharacter.ApplyForce(mFisixBed.GetNormal());
+					mFisixBed.OnCharacterRebound();
+					
+					// El personaje siempre nos da su posición en espacio de padre, así que lo
+					// tenemos que convertir a coordenadas globales
+					mLifeScore.OnCharacterRebound(mGameContainer.localToGlobal(nextCharPos));
+				}
+
+				mLevel.Update(elapsedTime);
+				mFisixBed.Update(elapsedTime);
+				mMainCharacter.Update(elapsedTime);
+				mLifeScore.Update(elapsedTime);
+				
+				//lastTime = currentTime;
+			}
+			
+			private var mNumLoaded : int = 0;		// Para llevar la cuenta del número de ficheros cargados
+			
+			private var mSWFLoader : SWFLoader;
+			private var mXMLLoader : URLLoader;
+			
+			private var mGameParams : GameParams;
+			
+			private var mGameContainer : UIComponent;
+			
+			private var mFisixBed : FisixBed;
+			private var mMainCharacter : Character;
+			private var mLevel : HorizontalLevel;
+			private var mLifeScore : LifeScore;
+		]]>
+	</mx:Script>
+</mx:Application>
+
+
+
+
+<!--
+
+	import Box2D.Dynamics.b2DebugDraw;
+	import Box2D.Collision.Shapes.b2CircleShape;
+	import Box2D.Collision.Shapes.b2ShapeDef;
+	import Box2D.Collision.Shapes.b2PolygonDef;
+	import Box2D.Dynamics.b2Body;
+	import Box2D.Dynamics.b2BodyDef;
+	import Box2D.Dynamics.b2World;
+	import Box2D.Common.Math.b2Vec2;
+	import Box2D.Collision.b2AABB;
+	import Box2D.Collision.Shapes.b2Shape;
+			
+	private function InitPhysics() : void
+	{
+		CreatePhyWorld();
+							
+		var dynamicBodyDef : b2BodyDef = new b2BodyDef();
+		dynamicBodyDef.position.Set(0, 0);
+		var dynamicBody:b2Body = mPhyWorld.CreateBody(dynamicBodyDef);
+	
+		var dynamicShapeDef : b2PolygonDef = new b2PolygonDef();
+		dynamicShapeDef.SetAsBox(1.0, 1.0);
+		dynamicShapeDef.density = 1.0;
+		dynamicShapeDef.friction = 0.3;
+		dynamicBody.CreateShape(dynamicShapeDef);
+		dynamicBody.SetMassFromShapes();
+		
+		SetDebugDraw();
+	}
+	
+	private function CreatePhyWorld() : void
+	{
+		var worldAABB : b2AABB = new b2AABB();
+		worldAABB.lowerBound.Set(-50, -50);
+		worldAABB.upperBound.Set(50, 50);
+
+		var grav : b2Vec2 = new b2Vec2(0, 9.8);
+		var doSleep : Boolean = true;
+		
+		mPhyWorld = new b2World(worldAABB, grav, doSleep);
+	}
+	
+	private function SetDebugDraw() : void
+	{
+		// set debug draw
+		var dbgDraw:b2DebugDraw = new b2DebugDraw();
+		var dbgSprite:Sprite = new UIComponent();
+		addChild(dbgSprite);
+		dbgSprite.x = width*0.5;
+		dbgSprite.y = 0;
+		dbgDraw.m_sprite = dbgSprite;
+		dbgDraw.m_drawScale = 30.0;
+		dbgDraw.m_fillAlpha = 0.3;
+		dbgDraw.m_lineThickness = 1.0;
+		dbgDraw.m_drawFlags = b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit;
+		mPhyWorld.SetDebugDraw(dbgDraw);	
+	}
+	
+	private function CreateWalls() : void
+	{
+		var wallsDef : b2BodyDef = new b2BodyDef();
+		wallsDef.position.Set(-10, 10);
+
+		var wallShapeDef : b2PolygonDef = new b2PolygonDef();
+		wallShapeDef.SetAsBox(0.1, 10);
+		
+		mLeftWall = mPhyWorld.CreateBody(wallsDef);				
+		mLeftWall.CreateShape(wallShapeDef);
+		
+		wallsDef.position.Set(10, 10);
+		
+		mRightWall = mPhyWorld.CreateBody(wallsDef);
+		mRightWall.CreateShape(wallShapeDef);
+	}
+	
+	/*
+		var timeStep:Number = 1.0 / 30.0;
+		var iterations:Number = 10;
+		
+		mPhyWorld.Step(timeStep, iterations);
+	*/				
+	
+	private var mPhyWorld : b2World;
+	private var mLeftWall : b2Body;
+	private var mRightWall : b2Body;
+-->
